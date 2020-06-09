@@ -1,0 +1,106 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"math/rand"
+	"net/http"
+	"os"
+
+	"github.com/gorilla/mux"
+)
+
+type stringcount struct {
+	String string `json:"String"`
+	Key    []int  `json:"Key"`
+	Output []byte `json:"Result"`
+}
+
+func getPort() string {
+	p := os.Getenv("PORT")
+	fmt.Println(p)
+	if p != "" {
+		return ":" + p
+	}
+	return ":8080"
+}
+
+func randomNumber(min, max int) int {
+	z := rand.Intn(max)
+	if z < min {
+		z = min
+	}
+	return z
+}
+
+func check(n *[]int, y int) {
+	nest := *n
+	insertion := randomNumber(1, y)
+	for i := range nest {
+		if nest[i] == insertion {
+			return
+		}
+	}
+	nest = append(nest, insertion)
+	*n = nest
+}
+
+func Encode(w http.ResponseWriter, r *http.Request) {
+	S := stringcount{}
+	S.String = mux.Vars(r)["string"]
+	By := []byte(S.String)
+	samelength := false
+	for samelength == false {
+		if len(By) == len(S.Key) {
+			samelength = true
+		}
+		check(&S.Key, len(By)+1)
+	}
+	for index := range By {
+		for index2 := range S.Key {
+			S.Output = append(S.Output, byte(int(By[index])+S.Key[index2]))
+		}
+	}
+	S.String = "Encoded"
+	json.NewEncoder(w).Encode(S)
+}
+
+func Decode(w http.ResponseWriter, r *http.Request) {
+	S := stringcount{}
+	err := json.Unmarshal([]byte(mux.Vars(r)["string"]), &S)
+	if err != nil {
+		fmt.Println(err)
+	}
+	decoded := []byte{}
+	counter := 0
+	for i := range S.Output {
+		counter = counter + 1
+		if counter == len(S.Key) {
+			decoded = append(decoded, byte(int(S.Output[i])-S.Key[counter-1]))
+			counter = 0
+		}
+	}
+	S.String = string(decoded[:])
+	json.NewEncoder(w).Encode(S)
+}
+
+func front(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Encodes and decodes strings!\n")
+	fmt.Fprintf(w, "Commands:\n")
+	fmt.Fprintf(w, `1) /encode/{string} - encodes a string and generateds a key and byte output - example: {"String":"TEST","Key":[1,2,3],"Result":"output"}`+"\n")
+	fmt.Fprintf(w, `2) /decode/JSON - decodes JSON formatted like above`+"\n")
+
+}
+
+func main() {
+	port := getPort()
+	fmt.Println("API has started.")
+	fmt.Println("Running on port " + port)
+	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc("/", front)
+	router.HandleFunc("/encode/{string}", Encode).Methods("GET")
+	router.HandleFunc("/decode/{string}", Decode).Methods("GET")
+	log.Fatal(http.ListenAndServe(port, router))
+
+}
