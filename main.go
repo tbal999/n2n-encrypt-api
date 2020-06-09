@@ -88,7 +88,7 @@ func Decode(w http.ResponseWriter, r *http.Request) {
 func front(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Encodes and decodes strings!\n")
 	fmt.Fprintf(w, "Commands:\n")
-	fmt.Fprintf(w, `1) /encode/{string} - encodes a string and generateds a key and byte output - example: {"String":"TEST","Key":[1,2,3],"Result":"output"}`+"\n")
+	fmt.Fprintf(w, `1) /encode/{string} - encodes a string and generates a key and byte output - example: {"String":"TEST","Key":[1,2,3],"Result":"output"}`+"\n")
 	fmt.Fprintf(w, `2) /decode/JSON - decodes JSON formatted like above`+"\n")
 
 }
