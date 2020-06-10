@@ -1,4 +1,4 @@
-module encodeapp
+module n2n-encrypt-api
 
 go 1.14
 
