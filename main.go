@@ -46,7 +46,7 @@ func check(n *[]int, y int) {
 	*n = nest
 }
 
-func Encode(w http.ResponseWriter, r *http.Request) {
+func encode(w http.ResponseWriter, r *http.Request) {
 	S := stringcount{}
 	S.String = mux.Vars(r)["string"]
 	By := []byte(S.String)
@@ -66,7 +66,7 @@ func Encode(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(S)
 }
 
-func Decode(w http.ResponseWriter, r *http.Request) {
+func decode(w http.ResponseWriter, r *http.Request) {
 	S := stringcount{}
 	err := json.Unmarshal([]byte(mux.Vars(r)["string"]), &S)
 	if err != nil {
@@ -99,8 +99,8 @@ func main() {
 	fmt.Println("Running on port " + port)
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", front)
-	router.HandleFunc("/encode/{string}", Encode).Methods("GET")
-	router.HandleFunc("/decode/{string}", Decode).Methods("GET")
+	router.HandleFunc("/encode/{string}", encode).Methods("GET")
+	router.HandleFunc("/decode/{string}", decode).Methods("GET")
 	log.Fatal(http.ListenAndServe(port, router))
 
 }
