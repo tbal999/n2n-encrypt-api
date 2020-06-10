@@ -47,6 +47,7 @@ func check(n *[]int, y int) {
 }
 
 func Encode(w http.ResponseWriter, r *http.Request) {
+	rand.Seed(time.Now().UTC().UnixNano())
 	S := stringcount{}
 	S.String = mux.Vars(r)["string"]
 	By := []byte(S.String)
