@@ -101,6 +101,5 @@ func main() {
 	router.HandleFunc("/", front)
 	router.HandleFunc("/encode/{string}", encode).Methods("GET")
 	router.HandleFunc("/decode/{string}", decode).Methods("GET")
-	log.Fatal(http.ListenAndServe(port, router))
-
+	log.Fatal(http.ListenAndServe(port, router) //testing kraken git push
 }
