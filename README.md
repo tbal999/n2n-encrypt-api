@@ -1,6 +1,6 @@
 # n2n-encrypt-api
 Encodes and decodes strings!
-This is best used on small strings - like one line sentences. 
+This is best used on small strings - like two or three words - or usernames/passwords.
 For example, on a 30kb string the key will be 166kb and the encrypted message will be over 1GB in size!
 
 How?
