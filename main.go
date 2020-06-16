@@ -11,6 +11,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var seededRand *rand.Rand = rand.New(
+	rand.NewSource(time.Now().UnixNano()))
+
 type stringcount struct {
 	String string `json:"String"`
 	Key    []int  `json:"Key"`
@@ -27,7 +30,7 @@ func getPort() string {
 }
 
 func randomNumber(min, max int) int {
-	z := rand.Intn(max)
+	z := seededRand.Intn(max)
 	if z < min {
 		z = min
 	}
