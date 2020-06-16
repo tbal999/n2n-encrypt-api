@@ -3,6 +3,9 @@ Encodes and decodes strings!
 This is best used on small strings - like one line sentences. 
 For example, on a 30kb string the key will be 166kb and the encrypted message will be over 1GB in size!
 
+How?
+- It shifts every single character by a random amount and creates a key that's the length of the string. 
+
 Commands:
 1) /encode/{string} - encodes a string and generates a key that's the length of the string, and the encrypted output in bytes - example: {"String":"TEST","Key":[1,2,3,4],"Result":"encryptedoutputinbytes"}
 
