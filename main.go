@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"log"
 	"math/rand"
 	"net/http"
@@ -52,7 +54,17 @@ func check(n *[]int, y int) {
 
 func encode(w http.ResponseWriter, r *http.Request) {
 	S := stringcount{}
-	S.String = mux.Vars(r)["string"]
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
+	if err != nil {
+		fmt.Println(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		fmt.Println(err)
+	}
+	err2 := json.Unmarshal(body, &S)
+	if err2 != nil {
+		fmt.Println(err2)
+	}
 	By := []byte(S.String)
 	samelength := false
 	for samelength == false {
@@ -67,14 +79,26 @@ func encode(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	S.String = "Encoded"
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(S)
 }
 
 func decode(w http.ResponseWriter, r *http.Request) {
 	S := stringcount{}
-	err := json.Unmarshal([]byte(mux.Vars(r)["string"]), &S)
+	body, err := ioutil.ReadAll(io.LimitReader(r.Body, 1048576))
 	if err != nil {
 		fmt.Println(err)
+	}
+	if err := r.Body.Close(); err != nil {
+		fmt.Println(err)
+	}
+	if err != nil {
+		fmt.Println(err)
+	}
+	err2 := json.Unmarshal(body, &S)
+	if err2 != nil {
+		fmt.Println(err2)
 	}
 	decoded := []byte{}
 	counter := 0
@@ -86,6 +110,8 @@ func decode(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	S.String = string(decoded[:])
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(S)
 }
 
@@ -97,14 +123,43 @@ func front(w http.ResponseWriter, r *http.Request) {
 
 }
 
+type route struct {
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
+}
+
+type routes []route
+
+var allroutes = routes{
+	route{
+		"encode",
+		"POST",
+		"/encode",
+		encode,
+	},
+	route{
+		"decode",
+		"POST",
+		"/decode",
+		decode,
+	},
+}
+
 func main() {
-	port := getPort()
+	//port := getPort()
 	fmt.Println("API has started.")
-	fmt.Println("Running on port " + port)
+	//fmt.Println("Running on port " + port)
 	router := mux.NewRouter().StrictSlash(true)
+	for _, route := range allroutes {
+		router.
+			Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(route.HandlerFunc)
+	}
 	router.HandleFunc("/", front)
-	router.HandleFunc("/encode/{string}", encode).Methods("GET")
-	router.HandleFunc("/decode/{string}", decode).Methods("GET")
-	log.Fatal(http.ListenAndServe(port, router)) //testing kraken git push
+	log.Fatal(http.ListenAndServe("127.0.0.1:8080", router)) //testing kraken git push
 	//another test to check account
 }
